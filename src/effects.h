@@ -44,6 +44,7 @@
   EFFECT(gain)
   EFFECT(highpass)
   EFFECT(hilbert)
+  EFFECT(in_buffer)
   EFFECT(input)
 #ifdef HAVE_LADSPA_H
   EFFECT(ladspa)
@@ -55,6 +56,7 @@
   EFFECT(noisered)
   EFFECT(norm)
   EFFECT(oops)
+  EFFECT(out_buffer)
   EFFECT(output)
   EFFECT(overdrive)
   EFFECT(pad)
