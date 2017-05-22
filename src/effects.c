@@ -400,6 +400,87 @@ static int drain_effect(sox_effects_chain_t * chain, size_t n)
 }
 
 /* Flow data through the effects chain until an effect or callback gives EOF */
+int sox_flow_buffer_prepare(sox_effects_chain_t * chain)
+{
+  int flow_status = SOX_SUCCESS;
+  size_t e = 0;               /* effect indices */
+  size_t max_flows = 0;
+
+  for (e = 0; e < chain->length; ++e) {
+    sox_effect_t *effp = chain->effects[e];
+    effp->obuf =
+        lsx_realloc(effp->obuf, sox_globals.bufsiz * sizeof(*effp->obuf));
+      /* Memory will be freed by sox_delete_effect() later. */
+      /* Possibly there was already a buffer, if this is a used effect;
+         it may still contain samples in that case. */
+      if (effp->oend > sox_globals.bufsiz) {
+        lsx_warn("buffer size insufficient; buffered samples were dropped");
+        /* can only happen if bufsize has been reduced since the last run */
+        effp->obeg = effp->oend = 0;
+      }
+    max_flows = max(max_flows, effp->flows);
+  }
+  if (max_flows > 1) /* might need interleave buffer */
+    chain->il_buf = lsx_malloc(sox_globals.bufsiz * sizeof(sox_sample_t));
+  else
+    chain->il_buf = NULL;
+
+  /* Go through the effects, and if there are samples in one of the
+     buffers, deinterleave it (if necessary).  */
+  for (e = 0; e + 1 < chain->length; e++) {
+    sox_effect_t *effp = chain->effects[e];
+    if (effp->oend > effp->obeg && chain->effects[e+1]->flows > 1) {
+      sox_sample_t *sw = chain->il_buf; chain->il_buf = effp->obuf; effp->obuf = sw;
+      deinterleave(chain->effects[e+1]->flows, effp->oend - effp->obeg,
+          chain->il_buf, effp->obuf, sox_globals.bufsiz, effp->obeg);
+    }
+  }
+
+  return flow_status;
+}
+
+/* Flow data through the effects chain until an effect or callback gives EOF */
+int sox_flow_buffer_effects(sox_effects_chain_t * chain)
+{
+  int flow_status = SOX_SUCCESS;
+  size_t e = 0;               /* effect indices */
+
+  for (e = 0; e < chain->length; e++) {
+    if (e == 0) {
+      if (drain_effect(chain, e) == SOX_EOF) {
+        return SOX_EOF;
+      }
+    } else {
+      flow_effect(chain, e);
+    }
+  }
+
+  return flow_status;
+}
+
+/* Flow data through the effects chain until an effect or callback gives EOF */
+int sox_end_buffer_effects(sox_effects_chain_t * chain)
+{
+  int flow_status = SOX_SUCCESS;
+  size_t e = 0;               /* effect indices */
+
+  /* If an effect's output buffer still has samples, and if it is
+     uninterleaved, then re-interleave it. Necessary since it might
+     be reused, and at that time possibly followed by an MCHAN effect. */
+  for (e = 0; e + 1 < chain->length; e++) {
+    sox_effect_t *effp = chain->effects[e];
+    if (effp->oend > effp->obeg && chain->effects[e+1]->flows > 1) {
+      sox_sample_t *sw = chain->il_buf; chain->il_buf = effp->obuf; effp->obuf = sw;
+      interleave(chain->effects[e+1]->flows, effp->oend - effp->obeg,
+          chain->il_buf, sox_globals.bufsiz, effp->obeg, effp->obuf);
+    }
+  }
+
+  free(chain->il_buf);
+  return flow_status;
+}
+
+/* Flow data through the effects chain until an effect or callback gives EOF */
 int sox_flow_effects(sox_effects_chain_t * chain, int (* callback)(sox_bool all_done, void * client_data), void * client_data)
 {
   int flow_status = SOX_SUCCESS;

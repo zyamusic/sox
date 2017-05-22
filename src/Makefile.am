@@ -35,7 +35,7 @@ endif
 #########################
 
 bin_PROGRAMS = sox
-EXTRA_PROGRAMS = example0 example1 example2 example3 example4 example5 example6 sox_sample_test
+EXTRA_PROGRAMS = example0 example1 example2 example3 example4 example5 example6 example7 sox_sample_test
 lib_LTLIBRARIES = libsox.la
 include_HEADERS = sox.h
 sox_SOURCES = sox.c
@@ -50,6 +50,7 @@ example3_SOURCES = example3.c
 example4_SOURCES = example4.c
 example5_SOURCES = example5.c
 example6_SOURCES = example6.c
+example7_SOURCES = example7.c
 sox_sample_test_SOURCES = sox_sample_test.c sox_sample_test.h
 
 
@@ -67,7 +68,7 @@ libsox_la_SOURCES = adpcms.c adpcms.h aiff.c aiff.h cvsd.c cvsd.h cvsdfilt.h \
 
 # Effects source
 libsox_la_SOURCES += \
-	band.h bend.c biquad.c biquad.h biquads.c chorus.c compand.c \
+	band.h bend.c biquad.c biquad.h biquads.c in_buffer.c out_buffer.c chorus.c compand.c \
 	compandt.c compandt.h contrast.c dcshift.c delay.c dft_filter.c \
 	dft_filter.h dither.c dither.h divide.c downsample.c earwax.c \
 	echo.c echos.c effects.c effects.h effects_i.c effects_i_dsp.c \
@@ -140,12 +141,13 @@ example3_LDADD = ${sox_LDADD}
 example4_LDADD = ${sox_LDADD}
 example5_LDADD = ${sox_LDADD}
 example6_LDADD = ${sox_LDADD}
+example7_LDADD = ${sox_LDADD}
 
 EXTRA_DIST = monkey.wav optional-fmts.am \
 	     CMakeLists.txt soxconfig.h.cmake \
 	     tests.sh testall.sh tests.bat testall.bat test-comments
 
-all: sox$(EXEEXT) play$(EXEEXT) rec$(EXEEXT) soxi$(EXEEXT) sox_sample_test$(EXEEXT) example0$(EXEEXT) example1$(EXEEXT) example2$(EXEEXT) example3$(EXEEXT) example4$(EXEEXT) example5$(EXEEXT) example6$(EXEEXT)
+all: sox$(EXEEXT) play$(EXEEXT) rec$(EXEEXT) soxi$(EXEEXT) sox_sample_test$(EXEEXT) example0$(EXEEXT) example1$(EXEEXT) example2$(EXEEXT) example3$(EXEEXT) example4$(EXEEXT) example5$(EXEEXT) example6$(EXEEXT) example7$(EXEEXT)
 
 play$(EXEEXT) rec$(EXEEXT) soxi$(EXEEXT): sox$(EXEEXT)
 	if test "$(PLAYRECLINKS)" = "yes"; then	\
@@ -171,7 +173,7 @@ uninstall-hook:
 clean-local:
 	$(RM) play$(EXEEXT) rec$(EXEEXT) soxi$(EXEEXT)
 	$(RM) sox_sample_test$(EXEEXT)
-	$(RM) example0$(EXEEXT) example1$(EXEEXT) example2$(EXEEXT) example3$(EXEEXT) example4$(EXEEXT) example5$(EXEEXT) example6$(EXEEXT)
+	$(RM) example0$(EXEEXT) example1$(EXEEXT) example2$(EXEEXT) example3$(EXEEXT) example4$(EXEEXT) example5$(EXEEXT) example6$(EXEEXT) example7$(EXEEXT)
 
 distclean-local:
 
@@ -186,6 +188,7 @@ loc:
 	$(example4_SOURCES) \
 	$(example5_SOURCES) \
 	$(example6_SOURCES) \
+	$(example7_SOURCES) \
 	$(sox_sample_test_SOURCES) \
 	$(libsox_la_SOURCES)
 

@@ -2136,6 +2136,39 @@ sox_flow_effects(
 
 /**
 Client API:
+Runs the effects chain, returns SOX_SUCCESS if successful.
+@returns SOX_SUCCESS if successful.
+*/
+int
+LSX_API
+sox_flow_buffer_prepare(
+    LSX_PARAM_INOUT  sox_effects_chain_t * chain /**< Effects chain to run. */
+    );
+
+/**
+Client API:
+Runs the effects chain, returns SOX_SUCCESS if successful.
+@returns SOX_SUCCESS if successful.
+*/
+int
+LSX_API
+sox_flow_buffer_effects(
+    LSX_PARAM_INOUT  sox_effects_chain_t * chain /**< Effects chain to run. */
+    );
+
+/**
+Client API:
+Runs the effects chain, returns SOX_SUCCESS if successful.
+@returns SOX_SUCCESS if successful.
+*/
+int
+LSX_API
+sox_end_buffer_effects(
+    LSX_PARAM_INOUT  sox_effects_chain_t * chain /**< Effects chain to run. */
+    );
+
+/**
+Client API:
 Gets the number of clips that occurred while running an effects chain.
 @returns the number of clips that occurred while running an effects chain.
 */
